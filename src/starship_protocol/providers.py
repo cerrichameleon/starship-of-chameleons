@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+from .brains import BrainConfig, OpenAICodexBrain
+
 
 @dataclass
 class AgentSpec:
@@ -54,13 +56,13 @@ class OpenClawProvider:
         }
 
     def create_captain_brain(self, spec: AgentSpec) -> CaptainBrain:
-        from .xwing_protocol import CaptainBrainConfig, OpenAICodexCaptainBrain
-
-        return OpenAICodexCaptainBrain(
-            CaptainBrainConfig(
+        return OpenAICodexBrain(
+            BrainConfig(
                 model=spec.model_id,
                 credentials_ref=spec.credentials_ref,
-            )
+                provider_id=self.provider_id,
+            ),
+            role_name=spec.role_name,
         )
 
 

@@ -10,7 +10,7 @@ from starship_protocol.captain_chat import build_captain_chat_session
 def main() -> None:
     parser = argparse.ArgumentParser(description="Talk directly to the Starship Captain")
     parser.add_argument("message", nargs="?", help="One-shot message for the Captain")
-    parser.add_argument("--provider", default="mock", choices=["openclaw", "mock"], help="Captain brain provider")
+    parser.add_argument("--provider", default="openclaw", choices=["openclaw", "mock"], help="Captain brain provider")
     parser.add_argument("--base-path", default=".", help="Project root for state files")
     parser.add_argument("--status", action="store_true", help="Show Captain chat session status")
     parser.add_argument("--interactive", action="store_true", help="Start an interactive Captain shell")

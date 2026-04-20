@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any
 
 from .models import Chameleon, CognitionAdapter, RoleType
+from .providers import AgentProvider, AgentSpec
 
 
 class EngineeringMode(str, Enum):
@@ -68,6 +69,32 @@ class ChiefEngineer(Chameleon):
 
     def outfit_chameleon(self, chameleon: Chameleon, brain: CognitionAdapter, **profile: Any) -> None:
         chameleon.assign_brain(brain, outfitted_by=self.name, engineering_mode=self.mode.value, **profile)
+
+    def outfit_with_provider(
+        self,
+        chameleon: Chameleon,
+        provider: AgentProvider,
+        *,
+        model_id: str,
+        credentials_ref: str,
+        capabilities: list[str] | None = None,
+    ) -> None:
+        spec = AgentSpec(
+            role_name=chameleon.role_type.value,
+            provider_id=provider.provider_id,
+            model_id=model_id,
+            credentials_ref=credentials_ref,
+            capabilities=capabilities or [],
+        )
+        brain = provider.create_captain_brain(spec)
+        self.outfit_chameleon(
+            chameleon,
+            brain,
+            provider_id=provider.provider_id,
+            model_id=model_id,
+            credentials_ref=credentials_ref,
+            capabilities=spec.capabilities,
+        )
 
     def _required_strength(self, complexity: int) -> int:
         if self.mode == EngineeringMode.CRITICAL_MISSION:
