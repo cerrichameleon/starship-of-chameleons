@@ -20,6 +20,7 @@ class RoleType(str, Enum):
     CREW_CAPTAIN = "CREW_CAPTAIN"
     SPECIALIST = "SPECIALIST"
     OXPECKER = "OXPECKER"
+    COMMS_OFFICER = "COMMS_OFFICER"
 
 
 class Status(str, Enum):
