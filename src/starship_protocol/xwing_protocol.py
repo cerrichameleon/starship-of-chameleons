@@ -8,7 +8,7 @@ from typing import Any
 from urllib import request
 
 from .comms import ProtocolError, SecureChannel, Uhura
-from .providers import AgentSpec, CaptainBrain, MockProvider, OpenClawProvider
+from .providers import AgentSpec, MockProvider, OpenClawProvider
 from .roles import Captain
 
 
@@ -108,7 +108,6 @@ class XWingStrikeCraft:
     captain: Captain
     uhura: Uhura
     mission: str
-    captain_brain: CaptainBrain
     active_channel: SecureChannel | None = None
 
     def __post_init__(self) -> None:
@@ -131,7 +130,7 @@ class XWingStrikeCraft:
             else "no active channel"
         )
         self.captain.update_working_memory({"event": "captain_prompt", "prompt": prompt, "channel_status": channel_status})
-        return self.captain_brain.think(
+        return self.captain.think(
             mission=self.mission,
             channel_status=channel_status,
             user_message=prompt,
@@ -171,6 +170,13 @@ def build_default_xwing(base_path: Path | None = None, provider: str = "openclaw
     )
     brain = provider_impl.create_captain_brain(spec)
     captain = Captain(name="Captain Kirk Skywalker")
+    captain.assign_brain(
+        brain,
+        provider_id=provider,
+        model_id=spec.model_id,
+        credentials_ref=spec.credentials_ref,
+        capabilities=spec.capabilities,
+    )
     uhura = Uhura(
         name="Uhura-D2",
         allowed_targets={"captain-bridge", "mission-control", "user-dm"},
@@ -183,5 +189,4 @@ def build_default_xwing(base_path: Path | None = None, provider: str = "openclaw
         captain=captain,
         uhura=uhura,
         mission="Maintain command authority while keeping communications compartmentalized.",
-        captain_brain=brain,
     )

@@ -39,6 +39,29 @@ Provider swap example:
 PYTHONPATH=src python3 examples/xwing_demo.py demo --provider mock
 ```
 
+## Captain chat proof of concept
+You can now talk directly to the Captain in a simple local chat loop.
+
+One-shot message:
+
+```bash
+PYTHONPATH=src python3 examples/captain_chat.py "Captain, give me a bridge update" --provider mock
+```
+
+Interactive mode:
+
+```bash
+PYTHONPATH=src python3 examples/captain_chat.py --interactive --provider mock
+```
+
+Session status:
+
+```bash
+PYTHONPATH=src python3 examples/captain_chat.py --status --provider mock
+```
+
+Conversation state is persisted in `var/captain_chat_state.json`.
+
 ## Working Idea
 This repository holds the code and design for the Starship of Chameleons Protocol, a provider-agnostic orchestration layer built around explicit crew roles, Captain-first interaction, and swappable brains.
 

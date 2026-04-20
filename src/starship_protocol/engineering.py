@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from .models import Chameleon, RoleType
+from .models import Chameleon, CognitionAdapter, RoleType
 
 
 class EngineeringMode(str, Enum):
@@ -65,6 +65,9 @@ class ChiefEngineer(Chameleon):
             "chosen_strength": chosen.strength,
             "chosen_cost_tier": chosen.cost_tier,
         }
+
+    def outfit_chameleon(self, chameleon: Chameleon, brain: CognitionAdapter, **profile: Any) -> None:
+        chameleon.assign_brain(brain, outfitted_by=self.name, engineering_mode=self.mode.value, **profile)
 
     def _required_strength(self, complexity: int) -> int:
         if self.mode == EngineeringMode.CRITICAL_MISSION:

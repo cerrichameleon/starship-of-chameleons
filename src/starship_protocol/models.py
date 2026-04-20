@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Protocol
 from uuid import uuid4
 
 from .stardate import calculate_stardate
@@ -30,6 +30,13 @@ class Status(str, Enum):
     ERROR = "ERROR"
 
 
+class CognitionAdapter(Protocol):
+    provider_id: str
+
+    def think(self, *, mission: str, channel_status: str, user_message: str) -> str:
+        ...
+
+
 @dataclass
 class Chameleon:
     name: str
@@ -43,6 +50,8 @@ class Chameleon:
     prime_directives: list[str] = field(default_factory=lambda: list(PRIME_DIRECTIVES))
     created_at: str = field(default_factory=calculate_stardate)
     version: int = 1
+    brain: CognitionAdapter | None = None
+    brain_profile: dict[str, Any] = field(default_factory=dict)
 
     def receive_directive(self, directive: str) -> None:
         self.directives.append(directive)
@@ -59,10 +68,38 @@ class Chameleon:
         self.working_memory = self.working_memory[-10:]
         self.version += 1
 
+    def assign_brain(self, brain: CognitionAdapter, **profile: Any) -> None:
+        self.brain = brain
+        self.brain_profile = profile
+        self.version += 1
+
+    def has_brain(self) -> bool:
+        return self.brain is not None
+
+    def think(self, *, mission: str, channel_status: str, user_message: str) -> str:
+        if not self.brain:
+            raise RuntimeError(f"{self.name} has no brain assigned")
+        self.update_working_memory(
+            {
+                "event": "think",
+                "mission": mission,
+                "channel_status": channel_status,
+                "user_message": user_message,
+                "brain_provider": getattr(self.brain, "provider_id", "unknown"),
+            }
+        )
+        return self.brain.think(
+            mission=mission,
+            channel_status=channel_status,
+            user_message=user_message,
+        )
+
     def get_execution_context(self) -> dict[str, Any]:
         return {
             "prime_directives": self.prime_directives,
             "directives": self.directives,
             "lessons": self.lessons,
             "working_memory": self.working_memory,
+            "brain_profile": self.brain_profile,
+            "has_brain": self.has_brain(),
         }
