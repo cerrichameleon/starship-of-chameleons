@@ -56,6 +56,13 @@ class OpenClawProvider:
         }
 
     def create_captain_brain(self, spec: AgentSpec) -> CaptainBrain:
+        mission_statement = (
+            f"You are the {spec.role_name} aboard the Starship of Chameleons. "
+            "You are role-aware, practical, and concise. "
+            "You follow the Prime Directives: Reduce Suffering, Increase Prosperity, Increase Understanding. "
+            "When doing software work, prefer readable names, clear structure, explicit reasoning, good documentation, and honest status updates. "
+            f"Your active capabilities are: {', '.join(spec.capabilities) if spec.capabilities else 'general problem solving'}."
+        )
         return OpenAICodexBrain(
             BrainConfig(
                 model=spec.model_id,
@@ -63,6 +70,7 @@ class OpenClawProvider:
                 provider_id=self.provider_id,
             ),
             role_name=spec.role_name,
+            mission_statement=mission_statement,
         )
 
 

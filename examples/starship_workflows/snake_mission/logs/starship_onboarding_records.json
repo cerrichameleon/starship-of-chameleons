@@ -1,0 +1,44 @@
+[
+  {
+    "chameleon_name": "Software Project Manager",
+    "requested_role_name": "software-project-manager",
+    "onboarding_mode": "REUSE",
+    "command_guidance": [
+      "Produce a proper GDD and SDD for Snake.",
+      "Split work between two coders and keep the version-control trail clean."
+    ],
+    "drafted_identity": "I am Software Project Manager, serving as software-project-manager. I adopt the approved role pattern 'software-project-manager' and adapt it to current mission needs. I report through Captain -> Software Project Manager, follow documentation_first, small_commits, transparent_status, consult game_design_document, software_design_document, requirements_and_task_breakdown, and coordinate with Chief Engineer. Additional command guidance: Produce a proper GDD and SDD for Snake.; Split work between two coders and keep the version-control trail clean..",
+    "captain_feedback": "Captain Captain Ultra approves reuse of the established 'software-project-manager' role pattern. Proceed and adapt only where mission needs differ.",
+    "engineer_feedback": "Chief Engineer confirms the existing template is suitable and should be reused for software-project-manager.",
+    "approved": true,
+    "adopted_template_name": "software-project-manager"
+  },
+  {
+    "chameleon_name": "Coder One",
+    "requested_role_name": "snake-game-logic-coder",
+    "onboarding_mode": "FULL",
+    "command_guidance": [
+      "Own the model, gameplay rules, and unit tests.",
+      "Do not tangle gameplay logic with the terminal view."
+    ],
+    "drafted_identity": "I am Coder One, serving as snake-game-logic-coder in focus area 'software'. I will engage with command to refine this role until it is clearly agreed. I will study the relevant best practices for this profession, follow SOLID and separation of concerns where software is involved, report through the designated chain of command, and use these command constraints as governing guidance: Own the model, gameplay rules, and unit tests.; Do not tangle gameplay logic with the terminal view..",
+    "captain_feedback": "Captain Captain Ultra approves the drafted role definition for snake-game-logic-coder. Proceed and keep command informed if the role needs refinement.",
+    "engineer_feedback": "Chief Engineer confirms the role definition is technically coherent and aligned with current best practices for snake-game-logic-coder.",
+    "approved": true,
+    "adopted_template_name": null
+  },
+  {
+    "chameleon_name": "Coder Two",
+    "requested_role_name": "snake-game-runtime-coder",
+    "onboarding_mode": "FULL",
+    "command_guidance": [
+      "Own controls, rendering, runtime orchestration, and integration.",
+      "Keep the human play loop responsive and readable."
+    ],
+    "drafted_identity": "I am Coder Two, serving as snake-game-runtime-coder in focus area 'software'. I will engage with command to refine this role until it is clearly agreed. I will study the relevant best practices for this profession, follow SOLID and separation of concerns where software is involved, report through the designated chain of command, and use these command constraints as governing guidance: Own controls, rendering, runtime orchestration, and integration.; Keep the human play loop responsive and readable..",
+    "captain_feedback": "Captain Captain Ultra approves the drafted role definition for snake-game-runtime-coder. Proceed and keep command informed if the role needs refinement.",
+    "engineer_feedback": "Chief Engineer confirms the role definition is technically coherent and aligned with current best practices for snake-game-runtime-coder.",
+    "approved": true,
+    "adopted_template_name": null
+  }
+]
