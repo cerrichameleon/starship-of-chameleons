@@ -1,0 +1,6 @@
+PASS test_initial_state_has_three_segment_snake
+PASS test_reverse_direction_is_ignored
+PASS test_food_consumption_increases_score_and_length
+PASS test_wall_collision_ends_the_game
+PASS test_self_collision_ends_the_game
+PASS all 5 snake model tests
