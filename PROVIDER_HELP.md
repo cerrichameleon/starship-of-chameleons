@@ -105,8 +105,8 @@ If the Starship cannot do a step itself, it should still be able to guide the us
 
 **Readiness signs the Starship should surface**
 - Green: Codex OAuth profile detected and reusable.
-- Yellow: login flow started but human completion still needed.
-- Red: no usable Codex auth path present.
+- Yellow: login flow started or partial progress exists, but human completion is still needed.
+- Red: no usable Codex auth path is configured yet.
 
 **Date last reviewed:** 2026-04-24
 
@@ -162,8 +162,8 @@ If the Starship cannot do a step itself, it should still be able to guide the us
 
 **Readiness signs the Starship should surface**
 - Green: usable OpenAI API key detected.
-- Yellow: key entered but not yet persisted/validated, or account setup may still be incomplete.
-- Red: no usable OpenAI API key detected.
+- Yellow: key was entered or partial setup exists, but readiness is not confirmed yet.
+- Red: no usable OpenAI API key is configured yet.
 
 **Date last reviewed:** 2026-04-24
 
@@ -220,8 +220,8 @@ If the Starship cannot do a step itself, it should still be able to guide the us
 
 **Readiness signs the Starship should surface**
 - Green: usable Gemini API key detected.
-- Yellow: key entered but not yet persisted/validated, or provider-side setup may still be incomplete.
-- Red: no usable Gemini API key detected.
+- Yellow: key was entered or partial setup exists, but readiness is not confirmed yet.
+- Red: no usable Gemini API key is configured yet.
 
 **Date last reviewed:** 2026-04-24
 

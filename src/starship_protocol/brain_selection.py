@@ -68,19 +68,19 @@ def detect_provider_readiness() -> dict[str, dict[str, Any]]:
     return {
         "openai-api": {
             "status": "ready" if openai_key else "needs-setup",
-            "severity": "green" if openai_key else "yellow",
+            "severity": "green" if openai_key else "red",
             "ready": bool(openai_key),
             "detail": "API key detected and ready for launch." if openai_key else "No OpenAI API key detected yet.",
         },
         "codex-oauth": {
             "status": "ready" if codex_ready else "needs-human-login",
-            "severity": "green" if codex_ready else "yellow",
+            "severity": "green" if codex_ready else "red",
             "ready": codex_ready,
             "detail": "Codex OAuth profile detected in OpenClaw config." if codex_ready else "No Codex OAuth profile detected yet.",
         },
         "gemini-api": {
             "status": "ready" if gemini_key else "needs-setup",
-            "severity": "green" if gemini_key else "yellow",
+            "severity": "green" if gemini_key else "red",
             "ready": bool(gemini_key),
             "detail": "Gemini API key detected and ready for launch." if gemini_key else "No Gemini API key detected yet.",
         },
