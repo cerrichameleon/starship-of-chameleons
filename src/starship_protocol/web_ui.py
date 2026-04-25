@@ -104,6 +104,7 @@ def render_onboarding_page(view_model: OnboardingScreenViewModel) -> str:
             "<h2>Provider Monitor</h2>"
             "<p>At least one selected provider is ready. You can open a fresh Captain chat now, go back and finish the rest of your selected hookups, or reset onboarding and start over cleanly.</p>"
             f"<div class='readiness-detail'><strong>Captain launch order:</strong> {html.escape(selected_order_text)}</div>"
+            "<div class='readiness-detail'>Starship will use the first ready provider in that order when you open the Captain chat.</div>"
             "<table><thead><tr><th>Provider</th><th>Status</th><th>Readiness detail</th></tr></thead>"
             f"<tbody>{status_rows}</tbody></table>"
             "<a class='launch-link' href='/?tab=chat&fresh=1'>Start talking to the Captain</a>"
