@@ -78,6 +78,7 @@ class ChiefEngineer(Chameleon):
         model_id: str,
         credentials_ref: str,
         capabilities: list[str] | None = None,
+        **extra_profile: Any,
     ) -> None:
         spec = AgentSpec(
             role_name=chameleon.role_type.value,
@@ -91,9 +92,12 @@ class ChiefEngineer(Chameleon):
             chameleon,
             brain,
             provider_id=provider.provider_id,
+            provider_label=provider.provider_id,
             model_id=model_id,
+            access_path="oauth" if credentials_ref.startswith("auth-profile:") else "api-key",
             credentials_ref=credentials_ref,
             capabilities=spec.capabilities,
+            **extra_profile,
         )
 
     def _required_strength(self, complexity: int) -> int:

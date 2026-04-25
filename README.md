@@ -5,7 +5,7 @@ The Starship of Chameleons protocol for AI agent management.
 An upgrade project for OpenClaw, but architected to outlive any single provider or runtime.
 
 ## Status
-Bootstrap started locally.
+Bootstrap started locally. Current launcher is onboarding-first, with `/` gated into provider setup until you explicitly choose brain paths, set their order, and complete enough provider readiness before bridge chat. You can also restart onboarding cleanly for repeat first-run testing, and the repo includes canonical `starship` and `engage` alias installers.
 
 ## Working Idea
 This repository holds the code and design for the Starship of Chameleons Protocol, a provider-agnostic orchestration layer built around explicit crew roles, Captain-first interaction, and swappable brains.
@@ -14,6 +14,7 @@ This repository holds the code and design for the Starship of Chameleons Protoco
 - Name: Starship of Chameleons Protocol
 - Goal: create a child-simple, Captain-first multi-agent system
 - Core law: providers are adapters, never the ship itself
+- Launcher direction: open onboarding first, then let the user proceed into the Starship console
 - Full design details live in the white paper and evolving local docs
 
 ## Runnable X-Wing Slice
@@ -30,7 +31,7 @@ Concept:
 Run it:
 
 ```bash
-cd starship-of-chameleons-protocol
+cd /home/node/.openclaw/workspace/git/repositories/starship
 PYTHONPATH=src python3 examples/xwing_demo.py demo
 ```
 
