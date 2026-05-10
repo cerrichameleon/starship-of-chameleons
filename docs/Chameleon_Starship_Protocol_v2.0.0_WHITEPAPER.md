@@ -55,7 +55,11 @@ Inspired by the adaptability of chameleons and the structured command of a stars
 - **Traffic Light Gates** that give users granular control over automation levels
 - A **Skill Library** for packaging and reusing validated expertise across agents
 
-The system is designed to be human-in-the-loop by default, with all gates RED, progressively unlocking automation as trust is established. Every decision, output, and interaction is traceable, reversible, and governed by three immutable Prime Directives:
+The system is designed to be human-in-the-loop by default, with all gates RED, progressively unlocking automation as trust is established. Every decision, output, and interaction is traceable, reversible, and governed by three immutable Prime Directives.
+
+Current implementation note: the active Starship runtime now already includes an onboarding-first web launch flow, real provider readiness detection, provider-order-aware launch policy, and startup manifest truth-telling for provider identity, credential source, crew roster, bridge readiness, and selected provider order. The white paper should be kept aligned with those concrete runtime behaviors rather than implying they are still hypothetical.
+
+The Prime Directives remain:
 
 1. **Reduce Suffering**
 2. **Increase Prosperity**
@@ -330,12 +334,15 @@ Rules:
 
 Recommended startup pattern:
 1. Initialize Starship
-2. Set Prime Directives
-3. Define mission
-4. Ask gate preferences
-5. Decompose mission
-6. Execute through specialists and review
-7. Iterate and build lessons/skills
+2. Enter onboarding-first setup when provider readiness is not yet complete
+3. Let the operator choose and order provider paths, then complete API-key and/or OAuth setup
+4. Detect real readiness from environment, config, saved credentials, or auth profiles
+5. Launch the Captain only after onboarding is complete enough to support a real brain path
+6. Set Prime Directives and mission context
+7. Ask gate preferences
+8. Decompose mission
+9. Execute through specialists and review
+10. Iterate and build lessons/skills
 
 Anti-patterns include:
 - setting all gates to GREEN too early
@@ -486,14 +493,16 @@ Capabilities:
 - auto-install OpenClaw
 - configure agents/workspace
 - secure API/OAuth setup
-- launch GUI
+- launch onboarding-first GUI flow
 - containerized runtime
+- present truthful provider-readiness state before Captain launch
 
 ---
 
 ## 26. GUI Command Interface (Captain’s Console)
 
 Operator UI with panels for:
+- Onboarding / Provider Setup
 - Mission Control
 - Engineering
 - Security
@@ -501,6 +510,12 @@ Operator UI with panels for:
 - Performance Dashboard
 
 Goal: plain-English, low-friction controls.
+
+Current implementation direction:
+- launcher entrypoints should land on onboarding before raw Captain chat when provider setup is incomplete
+- onboarding should expose exactly which provider paths are selected, their order, and their readiness state
+- readiness should use explicit green/yellow/red semantics based on real credential/auth detection, not hand-wavy placeholders
+- Captain startup should surface truthful manifest details instead of fabricated boilerplate
 
 ---
 

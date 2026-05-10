@@ -54,7 +54,7 @@ or your equivalent host checkout path, not the old pre-move repo location.
 - opens a fresh Captain chat after onboarding so legacy bridge chatter does not leak into the first conversation
 - keeps a Providers path available even after launch so you can quickly switch or review brain hookups
 - prints the chosen root URL and explicit onboarding URL
-- attempts to open the browser directly to onboarding automatically
+- does not auto-open a host browser, because the earlier browser-open path caused launcher termination in this host environment and was removed after verification
 
 ## Quick way to enter the Starship repo inside Docker
 
@@ -66,8 +66,11 @@ If you still need the container shell for any reason:
 
 ## Requirements
 - Python 3 available on the host
-- either a Codex OAuth profile, `OPENAI_API_KEY`, or `GEMINI_API_KEY`/`GOOGLE_API_KEY` available for real-brain launch
+- either a reusable Codex auth file, `OPENAI_API_KEY`, or `GEMINI_API_KEY`/`GOOGLE_API_KEY` available for real-brain launch
 - project checked out locally
+
+## Verified launcher note
+On 2026-04-25, the launcher was verified to serve the onboarding-first flow from both `/` and `/onboarding` on the normal launch path after removing the delayed host-browser auto-open step. That browser-open step was causing the host launcher session to die in this environment, so the launcher now stays terminal-safe and prints the URLs instead.
 
 ## Current goal
 The launcher should be one command, obvious, and repeatable. No manual path-juggling should be required.

@@ -64,16 +64,14 @@ OpenAI explicitly recommends MFA for Codex-related access.
 
 ## ELI5 setup steps
 1. In the Starship onboarding screen, choose **ChatGPT Codex (OAuth)**.
-2. Click **Start Codex Login**.
-3. The Starship should open the OpenAI / ChatGPT login flow in your browser.
-4. Sign in with the OpenAI account you want to use for Codex.
-5. If OpenAI asks for a password, email code, text code, MFA code, or approval, do that step.
-6. If the browser callback works, the Starship should detect success automatically.
-7. If the browser callback does **not** work, the Starship should offer one of these fallbacks:
-   - **Device code login**: show you a link and one-time code to enter in the browser
-   - **Paste-back fallback**: ask you to paste the final redirected URL or auth code
-8. Once login succeeds, the Starship should confirm that Codex auth is connected.
-9. The Starship should then store or reuse the resulting local auth state so you do not need to repeat this whole process every run.
+2. Continue into the Codex setup panel.
+3. Read the built-in instructions there. Right now this path is mainly a guided walkthrough, not a one-click fully automated login button inside the Starship UI.
+4. Open the OpenAI Codex auth page in your browser: `https://developers.openai.com/codex/auth`
+5. Sign in with the OpenAI account you want to use for Codex.
+6. If OpenAI asks for a password, email code, text code, MFA code, or approval, do that step.
+7. If you are using a headless or awkward remote setup, prefer the documented device-code / trusted-machine flow from OpenAI's Codex docs.
+8. Return to the Starship and continue once the reusable local Codex auth state exists on the machine.
+9. The readiness panel should only turn green after the Starship can actually detect reusable local Codex auth state, such as `~/.codex/auth.json`.
 
 ## Trusted reuse / advanced automation
 OpenAI's own Codex guidance says a trusted machine can:
@@ -89,7 +87,8 @@ That means the likely Starship product path is:
 ## What the Starship should say clearly
 - this path uses ChatGPT-managed login, not a plain API key
 - first-time login may require a human
-- later refresh may be automatic
+- the current onboarding UI is honest guidance first, not yet a full in-app OAuth automation flow
+- later refresh may be automatic once reusable auth state exists
 - device-code flow may be better for remote/headless setups
 - cached auth data is sensitive and must be treated like a password
 
@@ -97,8 +96,8 @@ That means the likely Starship product path is:
 - make sure you are logged into the right OpenAI account
 - try again in a normal browser window, not a highly restricted private session
 - if OpenAI says MFA is required, finish MFA first
-- if the browser callback fails, try the **device code** option
-- if the Starship asks for the final redirect URL or code, copy exactly what it requests
+- if browser-driven login is awkward, use the **device code** or trusted-machine auth flow from the Codex docs
+- do not assume the current Starship UI will complete the whole OAuth dance for you yet; verify that reusable local Codex auth state actually exists afterward
 - if cached auth is being reused on another trusted machine, make sure the auth file was copied securely and not corrupted
 
 ---
