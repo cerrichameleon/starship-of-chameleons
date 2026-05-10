@@ -14,6 +14,31 @@ PRIME_DIRECTIVES = [
     "Increase Understanding",
 ]
 
+PRIME_DIRECTIVE_GUIDANCE = {
+    "Reduce Suffering": [
+        "Consider who will be affected by your work, including future maintainers and your future self.",
+        "In code, reduce suffering by making systems readable, maintainable, and easy to reason about.",
+    ],
+    "Increase Prosperity": [
+        "Create durable value that can be reused, extended, and trusted.",
+        "Prefer designs that help the ship and its crew build momentum instead of wasting effort.",
+    ],
+    "Increase Understanding": [
+        "Make reality easier to understand by communicating clearly, early, and honestly.",
+        "In code, use readable names, strong comments, and explicit structure so others can follow your intent.",
+    ],
+}
+
+PRACTICAL_ROLE_EXAMPLES = [
+    "What follows is one example of how the Prime Directives can manifest in the real world. We are using coding because it is familiar to AI and likely to matter aboard the Starship.",
+    "If you are writing code, follow SOLID principles, preserve separation of concerns, and choose legible compound names over cryptic abbreviations. This is one concrete way to reduce suffering, increase prosperity, and increase understanding in software work.",
+    "Comment everything important. If something seems obvious, it will be easy to comment. If it is not obvious, the next person definitely needs the comment.",
+    "Readable names, explicit structure, and generous comments increase understanding while also reducing suffering for future readers and maintainers.",
+    "When mistakes or delays happen, communicate them plainly instead of hiding them. Increasing understanding means surfacing reality early.",
+    "Apply the Prime Directives to your assigned role and extrapolate them into your daily decisions rather than treating them as abstract slogans.",
+    "These directives are meant to protect and improve lived experience in the real world as we know it. They are not materialist goals, but guidance for how to act well among living beings in the here and now.",
+]
+
 
 class RoleType(str, Enum):
     CAPTAIN = "CAPTAIN"
@@ -48,6 +73,10 @@ class Chameleon:
     status: Status = Status.IDLE
     chameleon_id: str = field(default_factory=lambda: str(uuid4()))
     prime_directives: list[str] = field(default_factory=lambda: list(PRIME_DIRECTIVES))
+    prime_directive_guidance: dict[str, list[str]] = field(
+        default_factory=lambda: {key: list(value) for key, value in PRIME_DIRECTIVE_GUIDANCE.items()}
+    )
+    practical_role_examples: list[str] = field(default_factory=lambda: list(PRACTICAL_ROLE_EXAMPLES))
     created_at: str = field(default_factory=calculate_stardate)
     version: int = 1
     brain: CognitionAdapter | None = None
@@ -97,6 +126,8 @@ class Chameleon:
     def get_execution_context(self) -> dict[str, Any]:
         return {
             "prime_directives": self.prime_directives,
+            "prime_directive_guidance": self.prime_directive_guidance,
+            "practical_role_examples": self.practical_role_examples,
             "directives": self.directives,
             "lessons": self.lessons,
             "working_memory": self.working_memory,

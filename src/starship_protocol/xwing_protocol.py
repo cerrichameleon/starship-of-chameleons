@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 from urllib import request
 
+from .brain_selection import select_brain_for_launch
 from .comms import ProtocolError, SecureChannel, Uhura
 from .providers import AgentSpec, MockProvider, OpenClawProvider
 from .roles import Captain
@@ -156,23 +157,28 @@ def build_default_xwing(base_path: Path | None = None, provider: str = "openclaw
     root = base_path or Path.cwd()
     audit_path = root / "var" / "uhura_audit.log"
     state_path = root / "var" / "uhura_state.json"
+
+    selection = select_brain_for_launch()
+    selected_provider_id = selection.provider_id if selection.provider_id != "unavailable" else provider
+
     provider_registry = {
-        "openclaw": OpenClawProvider(),
+        selected_provider_id: OpenClawProvider(provider_id=selected_provider_id),
         "mock": MockProvider(),
     }
-    provider_impl = provider_registry[provider]
+    provider_impl = provider_registry.get(selected_provider_id, OpenClawProvider(provider_id=selected_provider_id))
+
     spec = AgentSpec(
         role_name="Captain",
-        provider_id=provider,
-        model_id=os.getenv("STARSHIP_CAPTAIN_MODEL", "gpt-5.4"),
-        credentials_ref="auth-profile:openai-codex:mattcleere@gmail.com",
+        provider_id=selected_provider_id,
+        model_id=selection.model_id if selection.model_id != "none" else os.getenv("STARSHIP_CAPTAIN_MODEL", "gpt-5.4"),
+        credentials_ref=selection.credentials_ref if selection.credentials_ref != "none" else "unknown",
         capabilities=["command", "planning", "bridge-comms"],
     )
     brain = provider_impl.create_captain_brain(spec)
     captain = Captain(name="Captain Kirk Skywalker")
     captain.assign_brain(
         brain,
-        provider_id=provider,
+        provider_id=selected_provider_id,
         model_id=spec.model_id,
         credentials_ref=spec.credentials_ref,
         capabilities=spec.capabilities,

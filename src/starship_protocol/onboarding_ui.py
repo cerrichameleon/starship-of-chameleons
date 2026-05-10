@@ -9,6 +9,12 @@ import os
 from .brain_selection import LaunchPolicy, detect_provider_readiness
 
 
+PROVIDER_ENV_KEYS = {
+    "openai-api": "OPENAI_API_KEY",
+    "gemini-api": "GEMINI_API_KEY",
+}
+
+
 @dataclass
 class ProviderOptionViewData:
     provider_id: str
@@ -49,7 +55,7 @@ class OnboardingScreenViewModel:
             ProviderOptionViewData(
                 provider_id="codex-oauth",
                 label="ChatGPT Codex",
-                description="ChatGPT-managed login with one-time human auth, then reusable session.",
+                description="ChatGPT login path, with browser sign-in or device code fallback.",
             ),
             ProviderOptionViewData(
                 provider_id="gemini-api",
@@ -85,14 +91,14 @@ class OnboardingScreenViewModel:
                 needs_oauth=True,
                 help_sections={
                     "why-human": (
-                        "Codex OAuth needs a one-time human login. OpenAI may ask for password, MFA, text code, or other account verification."
+                        "Codex needs a one-time human login. OpenAI may ask for password, MFA, text code, or other account verification. Starship should use Codex's own auth file, not OpenClaw's saved profile."
                     ),
                     "steps": (
-                        "1. Open https://developers.openai.com/codex/auth\n"
-                        "2. Start the Codex login flow from the Starship.\n"
-                        "3. Sign in to the OpenAI account you want to use.\n"
-                        "4. Complete any MFA or verification step.\n"
-                        "5. If callback capture fails, use device-code login or paste back the final redirect/code when asked."
+                        "1. Open https://developers.openai.com/codex/auth and follow the Codex login instructions, or run codex login on the host if that is the supported local path.\n"
+                        "2. Sign in to the OpenAI account you want to use.\n"
+                        "3. Complete any MFA or account verification step OpenAI asks for.\n"
+                        "4. If browser-driven login is awkward, run codex login --device-auth instead.\n"
+                        "5. If this machine is headless, log in once on a machine with a browser and copy ~/.codex/auth.json onto the target machine."
                     ),
                 },
             ),
@@ -105,12 +111,12 @@ class OnboardingScreenViewModel:
                     "missing-subscription": (
                         "1. Go to https://aistudio.google.com/\n"
                         "2. Sign in with your Google account.\n"
-                        "3. Accept any AI Studio terms Google shows you.\n"
+                        "3. Accept any Google AI Studio terms if they appear.\n"
                         "4. Stay logged in and continue to create a Gemini API key."
                     ),
                     "find-key": (
-                        "1. In Google AI Studio, find the API key area.\n"
-                        "2. Create a Gemini API key.\n"
+                        "1. In Google AI Studio, open Get API key or the API keys page.\n"
+                        "2. Create a Gemini API key for the project Google gives you, or for the project you choose.\n"
                         "3. Copy it immediately and paste it back here."
                     ),
                 },
@@ -125,9 +131,16 @@ class OnboardingScreenViewModel:
             readiness = readiness_by_provider.get(provider_id)
             if not readiness:
                 continue
-            setup.status = str(readiness.get("status", setup.status))
-            setup.severity = str(readiness.get("severity", setup.severity))
-            setup.readiness_detail = str(readiness.get("detail", setup.readiness_detail))
+            detected_status = str(readiness.get("status", setup.status))
+            detected_severity = str(readiness.get("severity", setup.severity))
+            detected_detail = str(readiness.get("detail", setup.readiness_detail))
+            if setup.severity == "green":
+                continue
+            if setup.severity == "yellow" and setup.api_key_value and detected_severity != "green":
+                continue
+            setup.status = detected_status
+            setup.severity = detected_severity
+            setup.readiness_detail = detected_detail
         self._derive_step_from_readiness()
         self._save_state()
 
@@ -169,14 +182,14 @@ class OnboardingScreenViewModel:
             setup.status = "key-entered" if setup.api_key_value else "needs-setup"
             setup.severity = "yellow" if setup.api_key_value else "red"
             setup.readiness_detail = (
-                "Key entered in the form. Persist or export it so runtime detection can verify readiness."
+                "Key entered in the form. Starship will persist it to var/provider_credentials.json so runtime detection can verify readiness."
                 if setup.api_key_value
                 else "No API key entered yet."
             )
         elif setup.needs_oauth:
             setup.status = "waiting-for-oauth"
             setup.severity = "yellow"
-            setup.readiness_detail = "Waiting for the one-time human login to complete."
+            setup.readiness_detail = "Waiting for the one-time human login and reusable local Codex auth state to exist."
         self._persist_provider_entry(setup)
         self.refresh_readiness()
         self._advance_to_next_provider(provider_id)
@@ -253,13 +266,30 @@ class OnboardingScreenViewModel:
         self._save_state()
 
     def _persist_provider_entry(self, setup: ProviderSetupViewData) -> None:
-        env_name = None
-        if setup.provider_id == "openai-api" and setup.api_key_value:
-            env_name = "OPENAI_API_KEY"
-        elif setup.provider_id == "gemini-api" and setup.api_key_value:
-            env_name = "GEMINI_API_KEY"
-        if env_name:
-            os.environ[env_name] = setup.api_key_value
+        provider_env_key = PROVIDER_ENV_KEYS.get(setup.provider_id)
+        if not provider_env_key:
+            return
+
+        credentials_path = self.state_path.parent / "provider_credentials.json"
+        credentials_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            payload = json.loads(credentials_path.read_text()) if credentials_path.exists() else {}
+        except Exception:
+            payload = {}
+        if not isinstance(payload, dict):
+            payload = {}
+
+        if setup.api_key_value:
+            payload[provider_env_key] = setup.api_key_value
+            os.environ[provider_env_key] = setup.api_key_value
+        else:
+            payload.pop(provider_env_key, None)
+            os.environ.pop(provider_env_key, None)
+
+        if payload:
+            credentials_path.write_text(json.dumps(payload, indent=2) + "\n")
+        elif credentials_path.exists():
+            credentials_path.unlink()
 
     def _load_state(self) -> None:
         if not self.state_path.exists():

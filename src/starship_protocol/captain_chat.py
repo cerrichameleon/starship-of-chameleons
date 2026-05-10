@@ -28,6 +28,11 @@ class CaptainConversationSession:
             self.state_path.parent.mkdir(parents=True, exist_ok=True)
             self._load_state()
 
+    def reset_conversation(self) -> None:
+        self.history = []
+        self.mission = None
+        self._persist_state()
+
     def talk_to_captain(self, user_message: str) -> str:
         self.history.append(CaptainConversationTurn(role="user", text=user_message))
 

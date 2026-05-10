@@ -5,8 +5,6 @@ import os
 import socket
 import subprocess
 import sys
-import threading
-import webbrowser
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -126,10 +124,6 @@ def main() -> None:
         "launch_note": selection.launch_note,
         "attempt_log": selection.attempt_log,
     }))
-
-    opener = threading.Timer(1.0, lambda: webbrowser.open(onboarding_url))
-    opener.daemon = True
-    opener.start()
 
     launch_web_ui(host="127.0.0.1", port=port, base_path=project_root)
 

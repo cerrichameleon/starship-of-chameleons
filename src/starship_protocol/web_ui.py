@@ -210,7 +210,7 @@ def render_page(view_model: CaptainConsoleScreenViewModel) -> str:
     if view_model.active_tab == "chat":
         panel_html = (
             f"<div class='manifest'><div class='manifest-title'>current outfit</div><ul>{rendered_manifest}</ul></div>"
-            f"<div class='chat'>{rendered_messages}</div>"
+            f"<div class='chat' id='chat-log'>{rendered_messages}</div>"
             f"<form method='post' action='/chat'>"
             f"<input type='hidden' name='tab' value='chat'>"
             f"<textarea name='message' placeholder='{html.escape(view_model.chat_tab.placeholder_text)}'></textarea>"
@@ -279,6 +279,12 @@ def render_page(view_model: CaptainConsoleScreenViewModel) -> str:
       {panel_html}
     </div>
   </div>
+  <script>
+    const chatLog = document.getElementById('chat-log');
+    if (chatLog) {{
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }}
+  </script>
 </body>
 </html>
 """

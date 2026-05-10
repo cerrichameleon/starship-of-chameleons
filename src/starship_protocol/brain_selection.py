@@ -14,6 +14,14 @@ CONFIG_CANDIDATES = [
     Path.home() / ".openclaw" / "openclaw.json",
     Path("/home/node/.openclaw/openclaw.json"),
 ]
+CREDENTIAL_FILE_NAMES = [
+    Path("var/provider_credentials.json"),
+    Path("provider_credentials.json"),
+]
+CODEX_AUTH_CANDIDATES = [
+    Path(os.getenv("CODEX_HOME", "~/.codex")).expanduser() / "auth.json",
+    Path.home() / ".codex" / "auth.json",
+]
 
 
 @dataclass
@@ -48,6 +56,11 @@ def hydrate_known_credentials() -> dict[str, str]:
         else:
             hydrated[key_name] = configured_value
 
+    file_env = _load_file_env_vars()
+    for key_name in ["OPENAI_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]:
+        if key_name not in hydrated and file_env.get(key_name):
+            hydrated[key_name] = file_env[key_name]
+
     docker_env = _load_docker_env_vars()
     for key_name in ["OPENAI_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]:
         if key_name not in hydrated and docker_env.get(key_name):
@@ -63,7 +76,7 @@ def detect_provider_readiness() -> dict[str, dict[str, Any]]:
     hydrated = hydrate_known_credentials()
     openai_key = hydrated.get("OPENAI_API_KEY")
     gemini_key = hydrated.get("GEMINI_API_KEY") or hydrated.get("GOOGLE_API_KEY")
-    codex_ready = _codex_oauth_profile_available()
+    codex_ready = _codex_auth_available()
 
     return {
         "openai-api": {
@@ -76,7 +89,7 @@ def detect_provider_readiness() -> dict[str, dict[str, Any]]:
             "status": "ready" if codex_ready else "needs-human-login",
             "severity": "green" if codex_ready else "red",
             "ready": codex_ready,
-            "detail": "Codex OAuth profile detected in OpenClaw config." if codex_ready else "No Codex OAuth profile detected yet.",
+            "detail": "Codex auth file detected for direct Starship use." if codex_ready else "No Codex auth file detected yet. Run codex login or codex login --device-auth first.",
         },
         "gemini-api": {
             "status": "ready" if gemini_key else "needs-setup",
@@ -93,6 +106,7 @@ def select_brain_for_launch(policy: LaunchPolicy | None = None) -> BrainSelectio
 
     openai_key = hydrated.get("OPENAI_API_KEY")
     gemini_key = hydrated.get("GEMINI_API_KEY") or hydrated.get("GOOGLE_API_KEY")
+    gemini_credentials_ref = "env:GEMINI_API_KEY" if hydrated.get("GEMINI_API_KEY") else "env:GOOGLE_API_KEY"
     provider_order = [provider_id for provider_id in (policy.provider_order if policy else []) if provider_id]
     if not provider_order:
         provider_order = ["codex", "openai-api", "gemini-api"]
@@ -100,19 +114,10 @@ def select_brain_for_launch(policy: LaunchPolicy | None = None) -> BrainSelectio
 
     for provider_id in provider_order:
         if provider_id in {"codex", "codex-oauth"}:
-            if _codex_oauth_profile_available():
-                attempt_log.append("codex oauth profile available in OpenClaw config")
-                return BrainSelectionResult(
-                    provider_label="Codex profile",
-                    model_label="gateway-managed",
-                    access_path="oauth",
-                    credentials_ref="auth-profile:openai-codex",
-                    launch_note="Using onboarding-aware Codex launch path through OpenClaw gateway.",
-                    using_tokens=False,
-                    attempt_log=attempt_log,
-                    provider_id="codex",
-                )
-            attempt_log.append("codex oauth profile unavailable")
+            if _codex_auth_available():
+                attempt_log.append("codex auth file detected, but direct Starship Codex runtime is not implemented yet")
+            else:
+                attempt_log.append("codex auth file unavailable")
             continue
 
         if provider_id == "openai-api":
@@ -138,7 +143,7 @@ def select_brain_for_launch(policy: LaunchPolicy | None = None) -> BrainSelectio
                     provider_label="Google",
                     model_label="gemini-2.5-pro",
                     access_path="api-key",
-                    credentials_ref="env:GEMINI_API_KEY",
+                    credentials_ref=gemini_credentials_ref,
                     launch_note="Using onboarding-aware Gemini API launch path.",
                     using_tokens=True,
                     attempt_log=attempt_log,
@@ -175,20 +180,46 @@ def _load_config_env_vars() -> dict[str, str]:
     return {}
 
 
-def _codex_oauth_profile_available() -> bool:
-    for candidate in CONFIG_CANDIDATES:
+def _load_file_env_vars() -> dict[str, str]:
+    candidate_from_env = os.getenv("STARSHIP_PROVIDER_CREDENTIALS_FILE")
+    candidates: list[Path] = []
+    if candidate_from_env:
+        candidates.append(Path(candidate_from_env))
+    cwd = Path.cwd()
+    candidates.extend(cwd / relative_path for relative_path in CREDENTIAL_FILE_NAMES)
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved_candidate = candidate.resolve()
+        if resolved_candidate in seen or not resolved_candidate.exists():
+            continue
+        seen.add(resolved_candidate)
+        try:
+            payload = json.loads(resolved_candidate.read_text())
+        except Exception:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        return {
+            str(key): str(value)
+            for key, value in payload.items()
+            if str(key) in {"OPENAI_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"} and value
+        }
+    return {}
+
+
+def _codex_auth_available() -> bool:
+    for candidate in CODEX_AUTH_CANDIDATES:
         if not candidate.exists():
             continue
         try:
-            config = json.loads(candidate.read_text())
+            payload = json.loads(candidate.read_text())
         except Exception:
             continue
-        profiles = config.get("auth", {}).get("profiles", {})
-        for profile_value in profiles.values():
-            if not isinstance(profile_value, dict):
-                continue
-            if profile_value.get("provider") == "openai-codex":
-                return True
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("auth_mode") in {"chatgpt", "api_key"} or payload.get("tokens") or payload.get("api_key"):
+            return True
     return False
 
 
